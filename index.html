@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>CineTalk — Realtime Voice</title>
+<title>CineTalk — Convai Voice</title>
 <meta name="theme-color" content="#0d0f14" />
-<meta name="description" content="CineTalk - Conversação em tempo real com OpenAI Realtime API" />
+<meta name="description" content="CineTalk - Conversação em tempo real com Convai API" />
 <style>
   /* ====== Reset & Base ====== */
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   :root{
     --bg-0:#0b0d12; --bg-1:#0f1320; --bg-2:#131a2a;
-    --ink:#eaf6ff; --muted:#9fb3c8; --brand:#10a37f; --brand-2:#1a7f64; --warn:#f59e0b; --err:#ef4444;
+    --ink:#eaf6ff; --muted:#9fb3c8; --brand:#6366f1; --brand-2:#4f46e5; --warn:#f59e0b; --err:#ef4444;
     --card:rgba(255,255,255,.04); --glass:rgba(255,255,255,.06);
     --bd:rgba(255,255,255,.08); --bd-2:rgba(255,255,255,.12);
     --radius:18px; --radius-sm:12px; --shadow:0 10px 40px rgba(0,0,0,.35);
@@ -19,8 +19,8 @@
   html,body{height:100%}
   body{
     font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-    background: radial-gradient(1200px 600px at 20% -10%, #16233c, transparent),
-                radial-gradient(1200px 800px at 120% 0%, #1b0f3c, transparent),
+    background: radial-gradient(1200px 600px at 20% -10%, #1e1b4b, transparent),
+                radial-gradient(1200px 800px at 120% 0%, #312e81, transparent),
                 linear-gradient(135deg, #0b0d12 0%, #0f1320 50%, #131a2a 100%);
     color:var(--ink);
     line-height:1.6;
@@ -43,17 +43,17 @@
   }
   .brand h1{
     font-size:1.6rem;font-weight:800;
-    background:linear-gradient(135deg, var(--brand), #26d07c);
+    background:linear-gradient(135deg, var(--brand), #818cf8);
     -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-    letter-spacing:0.2px;text-shadow:0 0 24px rgba(16,163,127,.35);
+    letter-spacing:0.2px;text-shadow:0 0 24px rgba(99,102,241,.35);
     white-space:nowrap;
   }
-  .badge{font-size:.8rem;font-weight:700;padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,var(--brand),var(--brand-2)); box-shadow:0 4px 18px rgba(16,163,127,.45)}
+  .badge{font-size:.8rem;font-weight:700;padding:6px 12px;border-radius:999px;background:linear-gradient(135deg,var(--brand),var(--brand-2)); box-shadow:0 4px 18px rgba(99,102,241,.45)}
   .conn{
     display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:999px;border:1px solid var(--bd);
     background:var(--card)
   }
-  .dot{width:10px;height:10px;border-radius:50%;background:#6b7280;box-shadow:0 0 0 0 rgba(16,163,127,.0)}
+  .dot{width:10px;height:10px;border-radius:50%;background:#6b7280;box-shadow:0 0 0 0 rgba(99,102,241,.0)}
   .dot.on{background:var(--brand);animation:dotPulse 2s infinite;box-shadow:0 0 10px var(--brand)}
   @keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.5}}
 
@@ -70,12 +70,12 @@
   .field{display:grid; gap:8px}
   .label{font-weight:700;color:var(--brand);font-size:.95rem}
   .input, .select{
-    width:100%;padding:14px 14px;border-radius:12px;border:2px solid rgba(16,163,127,.28);
+    width:100%;padding:14px 14px;border-radius:12px;border:2px solid rgba(99,102,241,.28);
     background:rgba(255,255,255,.04);color:var(--ink);outline:none;transition:.25s;
     font-size:1rem
   }
   .input::placeholder{color:#98a9bd}
-  .input:focus, .select:focus{border-color:var(--brand); box-shadow:0 0 16px rgba(16,163,127,.25)}
+  .input:focus, .select:focus{border-color:var(--brand); box-shadow:0 0 16px rgba(99,102,241,.25)}
   .muted{color:var(--muted);font-size:.9rem}
 
   /* ====== Chat ====== */
@@ -94,7 +94,7 @@
   .ptt{
     width:140px;height:140px;border-radius:999px;border:none;cursor:pointer;font-size:2.2rem;
     display:flex;align-items:center;justify-content:center;transition: transform .16s;
-    background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:#fff; box-shadow:0 14px 36px rgba(16,163,127,.45)
+    background:linear-gradient(135deg,var(--brand),var(--brand-2)); color:#fff; box-shadow:0 14px 36px rgba(99,102,241,.45)
   }
   .ptt:hover{transform:scale(1.05)}
   .ptt.listening{background:linear-gradient(135deg,var(--warn),#f59e0b); animation:pttPulse 1.6s infinite}
@@ -105,14 +105,14 @@
     text-align:center; font-weight:700; padding:12px 14px; border-radius:12px;
     background:rgba(255,255,255,.05); border:2px solid transparent; width:100%
   }
-  .status.ok{background:rgba(16,163,127,.15); border-color:var(--brand)}
+  .status.ok{background:rgba(99,102,241,.15); border-color:var(--brand)}
   .status.err{background:rgba(239,68,68,.15); border-color:#ef4444}
 
   .meter{height:56px; display:flex; gap:6px; align-items:flex-end; justify-content:center}
-  .bar{width:6px; background:linear-gradient(to top, var(--brand), #26d07c); border-radius:3px; height:8px}
+  .bar{width:6px; background:linear-gradient(to top, var(--brand), #818cf8); border-radius:3px; height:8px}
 
   /* ====== Footer actions ====== */
-  .row{display:flex; gap:10px}
+  .row{display:flex; gap:10px; flex-wrap:wrap}
   .btn{
     border:none; border-radius:10px; padding:12px 14px; font-weight:700; cursor:pointer;
     background:rgba(255,255,255,.06); color:#e8f3ff; border:1px solid var(--bd-2); transition:.2s
@@ -120,7 +120,6 @@
   .btn:hover{transform:translateY(-1px); box-shadow:0 6px 16px rgba(0,0,0,.25)}
   .btn.primary{background:linear-gradient(135deg,var(--brand),var(--brand-2)); border:none}
   .btn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);border:none}
-  .btn.ghost{background:transparent}
 
   /* Toasts */
   .toast-wrap{position:fixed; right:18px; bottom:18px; display:flex; flex-direction:column; gap:10px; z-index:99}
@@ -132,11 +131,13 @@
   /* Suggestions */
   .suggestions{display:grid; gap:10px}
   .sugg{background:rgba(255,255,255,.05); border:1px solid var(--bd); padding:12px 14px; border-radius:12px; cursor:pointer}
-  .sugg:hover{background:rgba(16,163,127,.12); border-color:var(--brand); transform:translateX(6px); transition:.18s}
+  .sugg:hover{background:rgba(99,102,241,.12); border-color:var(--brand); transform:translateX(6px); transition:.18s}
 
   @media (max-width:780px){
     .grid.cols-2{grid-template-columns:1fr}
     .ptt{width:110px;height:110px}
+    .row{flex-direction:column}
+    .btn{width:100%}
   }
 </style>
 </head>
@@ -148,7 +149,7 @@
     <div class="brand">
       <div style="font-size:1.6rem">🎬</div>
       <h1>CineTalk</h1>
-      <span class="badge">⚡ Realtime</span>
+      <span class="badge">⚡ Convai</span>
     </div>
     <div class="conn"><span class="dot" id="dot"></span><span id="connTxt">Desconectado</span></div>
   </div>
@@ -158,13 +159,13 @@
     <!-- Left: chat -->
     <section class="panel">
       <h2>Chat</h2>
-      <div class="sticky-tip">Dica: segure o botão para falar. Soltou? Eu respondo. Você também pode enviar texto 👇</div>
+      <div class="sticky-tip">Dica: clique em "Iniciar" e fale naturalmente. O assistente detecta quando você terminou de falar 🎙️</div>
       <div id="chat" class="chat" aria-live="polite"></div>
 
       <div style="margin-top:12px" class="row">
-        <input id="textInput" class="input" placeholder="Digite uma mensagem (Enter para enviar)" />
+        <input id="textInput" class="input" placeholder="Digite uma mensagem (Enter para enviar)" style="flex:1" />
         <button id="sendBtn" class="btn primary">Enviar</button>
-        <button id="copyBtn" class="btn">Copiar resposta</button>
+        <button id="copyBtn" class="btn">Copiar</button>
         <button id="clearBtn" class="btn danger">Limpar</button>
       </div>
     </section>
@@ -173,36 +174,22 @@
     <aside class="panel">
       <h2>Configuração</h2>
       <div class="field">
-        <label class="label" for="key">🔑 OpenAI API Key (dev/teste)</label>
-        <input id="key" class="input" type="password" placeholder="sk-..." autocomplete="off" />
-        <small class="muted">⚠️ Produção segura exige <strong>token efêmero</strong> gerado no seu backend (nunca exponha a key no browser).</small>
+        <label class="label" for="apiKey">🔑 Convai API Key</label>
+        <input id="apiKey" class="input" type="password" placeholder="Sua API key do Convai..." autocomplete="off" />
+        <small class="muted">Obtenha em <a href="https://convai.com/pipeline/dashboard" target="_blank" style="color:var(--brand)">convai.com/pipeline/dashboard</a></small>
       </div>
 
-      <div class="grid" style="margin-top:10px">
-        <div class="field">
-          <label class="label" for="voice">🎙️ Voz</label>
-          <select id="voice" class="select">
-            <option value="alloy">Alloy</option>
-            <option value="echo">Echo</option>
-            <option value="shimmer">Shimmer</option>
-            <option value="ash">Ash</option>
-            <option value="ballad">Ballad</option>
-            <option value="coral">Coral</option>
-          </select>
-        </div>
-        <div class="field">
-          <label class="label" for="model">🧠 Modelo</label>
-          <select id="model" class="select">
-            <option value="gpt-4o-realtime-preview-2024-10-01" selected>gpt-4o-realtime-preview-2024-10-01</option>
-          </select>
-        </div>
+      <div class="field" style="margin-top:10px">
+        <label class="label" for="charId">👤 Character ID</label>
+        <input id="charId" class="input" type="text" placeholder="ID do personagem..." />
+        <small class="muted">ID do character configurado no Convai dashboard</small>
       </div>
 
       <div class="panel" style="margin-top:12px">
         <h2>Controles de Voz</h2>
         <div class="controls">
-          <button id="ptt" class="ptt" title="Segure para falar">🎤</button>
-          <div id="status" class="status">Configure sua chave e segure o botão para falar</div>
+          <button id="ptt" class="ptt" title="Clique para iniciar/parar">🎤</button>
+          <div id="status" class="status">Configure API Key e Character ID para começar</div>
           <div id="meter" class="meter" aria-hidden="true">
             <div class="bar"></div><div class="bar"></div><div class="bar"></div>
             <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -228,8 +215,8 @@
   <section class="panel">
     <h2>ℹ️ Como funciona</h2>
     <p class="muted">
-      Este demo usa WebSocket da OpenAI Realtime API (voz <em>bidirecional</em> com VAD no servidor).
-      Para produção, gere um <strong>token efêmero</strong> no backend e troque o subprotocolo de autenticação.
+      Este app usa a <strong>Convai API</strong> para conversação de voz em tempo real com personagens de IA.
+      Configure um character no dashboard do Convai, obtenha sua API key e Character ID, e comece a conversar sobre cinema! 🎥
     </p>
   </section>
 
@@ -238,279 +225,438 @@
 <!-- Toasts -->
 <div id="toasts" class="toast-wrap"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
 <script>
   // ===================== State =====================
   const el = (id)=>document.getElementById(id);
-  const chat = el('chat'); const statusEl = el('status'); const dot = el('dot'); const connTxt = el('connTxt');
-  const ptt = el('ptt'); const voiceSel = el('voice'); const modelSel = el('model');
-  const keyInput = el('key'); const textInput = el('textInput'); const sendBtn = el('sendBtn');
-  const clearBtn = el('clearBtn'); const copyBtn = el('copyBtn'); const toasts = el('toasts');
-  const meter = el('meter'); const suggs = el('suggs');
+  const chat = el('chat');
+  const statusEl = el('status');
+  const dot = el('dot');
+  const connTxt = el('connTxt');
+  const ptt = el('ptt');
+  const apiKeyInput = el('apiKey');
+  const charIdInput = el('charId');
+  const textInput = el('textInput');
+  const sendBtn = el('sendBtn');
+  const clearBtn = el('clearBtn');
+  const copyBtn = el('copyBtn');
+  const toasts = el('toasts');
+  const meter = el('meter');
+  const suggs = el('suggs');
 
-  let ws=null, connected=false, apiKey='', selectedVoice='alloy', model=modelSel.value;
-  let audioCtx=null, stream=null, procNode=null, analyser=null, rafId=null;
-  let outgoingEnabled=false;
-  let audioQueue=[]; let playing=false; let currentAssistantDiv=null; let lastAssistantText='';
-  const SAMPLE_RATE = 24000;
+  let apiKey = '';
+  let characterId = '';
+  let sessionId = '';
+  let connected = false;
+  let audioCtx = null;
+  let stream = null;
+  let analyser = null;
+  let rafId = null;
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let lastAssistantText = '';
+  let isRecording = false;
 
-  const systemPrompt = `Você é CineTalk, um assistente de cinema.
-- Responda em 2-4 frases, voz natural e objetiva.
-- Sempre que possível, pergunte uma preferência do usuário para refinar recomendações.
-- Especialista em filmes clássicos, lançamentos, festivais e streaming.`;
+  const CONVAI_API_BASE = 'https://api.convai.com';
 
   // ===================== Helpers =====================
-  const toast=(msg)=>{ const d=document.createElement('div'); d.className='toast'; d.textContent=msg; toasts.appendChild(d); setTimeout(()=>{ d.style.opacity='0'; setTimeout(()=>d.remove(),300)},2200) }
-  const stamp=()=> new Date().toLocaleTimeString();
+  const toast = (msg) => {
+    const d = document.createElement('div');
+    d.className = 'toast';
+    d.textContent = msg;
+    toasts.appendChild(d);
+    setTimeout(() => {
+      d.style.opacity = '0';
+      setTimeout(() => d.remove(), 300);
+    }, 2500);
+  };
 
-  function addMsg(role, text){
-    const m=document.createElement('div');
-    m.className=`msg ${role}`;
-    m.textContent=text;
-    const t=document.createElement('div'); t.className='time'; t.textContent=stamp(); m.appendChild(t);
-    chat.appendChild(m); chat.scrollTop=chat.scrollHeight;
-    if(role==='assistant') lastAssistantText=text;
-    const all=chat.querySelectorAll('.msg'); if(all.length>60) all[0].remove();
+  const stamp = () => new Date().toLocaleTimeString();
+
+  function addMsg(role, text) {
+    const m = document.createElement('div');
+    m.className = `msg ${role}`;
+    m.textContent = text;
+    const t = document.createElement('div');
+    t.className = 'time';
+    t.textContent = stamp();
+    m.appendChild(t);
+    chat.appendChild(m);
+    chat.scrollTop = chat.scrollHeight;
+    if (role === 'assistant') lastAssistantText = text;
+    const all = chat.querySelectorAll('.msg');
+    if (all.length > 60) all[0].remove();
     return m;
   }
 
-  function updateAssistant(delta){
-    if(!currentAssistantDiv){
-      currentAssistantDiv=addMsg('assistant', delta||'');
-    } else {
-      currentAssistantDiv.firstChild.nodeValue += (delta||'');
-    }
-    chat.scrollTop=chat.scrollHeight;
-  }
-  function finalizeAssistant(){ currentAssistantDiv=null }
-
-  function setStatus(txt, ok=false, err=false){
+  function setStatus(txt, ok = false, err = false) {
     statusEl.textContent = txt;
-    statusEl.className='status'+(ok?' ok':'')+(err?' err':'');
+    statusEl.className = 'status' + (ok ? ' ok' : '') + (err ? ' err' : '');
   }
-  function setConn(on){
-    connected=on;
-    connTxt.textContent = on?'Conectado':'Desconectado';
+
+  function setConn(on) {
+    connected = on;
+    connTxt.textContent = on ? 'Conectado' : 'Desconectado';
     dot.classList.toggle('on', on);
-    ptt.classList.toggle('stop', on);
   }
 
   // ===================== Audio visuals =====================
-  function startMeter(){
-    if(!analyser) return;
-    const bars=[...meter.querySelectorAll('.bar')];
-    function loop(){
-      const arr=new Uint8Array(analyser.frequencyBinCount);
+  function startMeter() {
+    if (!analyser) return;
+    const bars = [...meter.querySelectorAll('.bar')];
+    function loop() {
+      const arr = new Uint8Array(analyser.frequencyBinCount);
       analyser.getByteFrequencyData(arr);
-      const step=Math.floor(arr.length/bars.length);
-      bars.forEach((b,i)=>{
-        const slice=arr.slice(i*step,(i+1)*step);
-        const avg=slice.reduce((a,c)=>a+c,0)/slice.length || 0;
-        const h=Math.max(6, Math.min(52, (avg/255)*56));
-        b.style.height=`${h}px`;
+      const step = Math.floor(arr.length / bars.length);
+      bars.forEach((b, i) => {
+        const slice = arr.slice(i * step, (i + 1) * step);
+        const avg = slice.reduce((a, c) => a + c, 0) / slice.length || 0;
+        const h = Math.max(6, Math.min(52, (avg / 255) * 56));
+        b.style.height = `${h}px`;
       });
-      rafId=requestAnimationFrame(loop);
+      rafId = requestAnimationFrame(loop);
     }
     loop();
   }
-  function stopMeter(){ if(rafId){ cancelAnimationFrame(rafId); rafId=null } }
 
-  // ===================== Audio I/O =====================
-  function f32ToPCM16(f){
-    const out=new Int16Array(f.length);
-    for(let i=0;i<f.length;i++){ const s=Math.max(-1,Math.min(1,f[i])); out[i]=s<0? s*0x8000 : s*0x7FFF }
-    return out;
-  }
-  const b64 = {
-    fromAB:(buf)=>{ let bin=''; const bytes=new Uint8Array(buf); for(let i=0;i<bytes.byteLength;i++) bin+=String.fromCharCode(bytes[i]); return btoa(bin) },
-    toAB:(base64)=>{ const bin=atob(base64); const len=bin.length; const bytes=new Uint8Array(len); for(let i=0;i<len;i++) bytes[i]=bin.charCodeAt(i); return bytes.buffer }
-  };
-
-  function playNext(){
-    if(playing) return;
-    const chunk=audioQueue.shift();
-    if(!chunk){ playing=false; return }
-    playing=true;
-    setStatus('🔊 Assistente falando...', true);
-    const buf=audioCtx.createBuffer(1, chunk.length, SAMPLE_RATE);
-    buf.getChannelData(0).set(chunk);
-    const src=audioCtx.createBufferSource(); src.buffer=buf; src.connect(audioCtx.destination);
-    src.onended=()=>{ playing=false; if(audioQueue.length){ playNext() } else { setStatus('🎤 Segure para falar', true) } };
-    src.start();
-  }
-
-  function queueAudio(base64){
-    const ab=b64.toAB(base64);
-    const i16=new Int16Array(ab);
-    const f32=new Float32Array(i16.length);
-    for(let i=0;i<i16.length;i++){ f32[i]= i16[i] / (i16[i]<0?0x8000:0x7FFF) }
-    if(audioQueue.length>50) audioQueue.shift();
-    audioQueue.push(f32);
-    if(!playing) playNext();
-  }
-
-  // ===================== WebSocket events =====================
-  function onWSMessage(ev){
-    const msg=JSON.parse(ev.data);
-    switch(msg.type){
-      case 'session.created':
-      case 'session.updated':
-        break;
-      case 'input_audio_buffer.speech_started':
-        ptt.classList.add('listening'); setStatus('🎤 Ouvindo...', true); break;
-      case 'input_audio_buffer.speech_stopped':
-        ptt.classList.remove('listening'); setStatus('🤔 Processando...', true); break;
-      case 'conversation.item.input_audio_transcription.completed':
-        if(msg.transcript) addMsg('user', msg.transcript);
-        break;
-      case 'response.audio_transcript.delta':
-        updateAssistant(msg.delta); break;
-      case 'response.audio.delta':
-        if(msg.delta) queueAudio(msg.delta); break;
-      case 'response.done':
-        finalizeAssistant(); setStatus('🎤 Segure para falar', true); break;
-      case 'error':
-        toast(`Erro: ${msg.error?.message||'desconhecido'}`); setStatus('❌ Erro', false, true); break;
+  function stopMeter() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
     }
   }
 
-  // ===================== Connect / Disconnect =====================
-  async function connectWS(){
-    if(!apiKey){ toast('Informe sua API key'); keyInput.focus(); return }
-    try{
-      setStatus('🔄 Conectando...');
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio:{ echoCancellation:true, noiseSuppression:true, autoGainControl:true, sampleRate:SAMPLE_RATE, channelCount:1 }
-      });
-      audioCtx = new (window.AudioContext||window.webkitAudioContext)({ sampleRate:SAMPLE_RATE });
+  // ===================== Convai API Functions =====================
+  async function startSession() {
+    if (!apiKey || !characterId) {
+      toast('Informe API Key e Character ID');
+      return false;
+    }
 
-      const srcNode=audioCtx.createMediaStreamSource(stream);
-      analyser=audioCtx.createAnalyser(); analyser.fftSize=1024; srcNode.connect(analyser); startMeter();
-
-      procNode = audioCtx.createScriptProcessor(4096,1,1);
-      srcNode.connect(procNode); procNode.connect(audioCtx.destination);
-
-      ws = new WebSocket(`wss://api.openai.com/v1/realtime?model=${encodeURIComponent(model)}`, [
-        'realtime',
-        `openai-insecure-api-key.${apiKey}`,
-        'openai-beta.realtime-v1'
-      ]);
-
-      ws.onopen=()=>{
-        setConn(true); setStatus('🟢 Conectado. Segure para falar', true); addMsg('system','Conectado ao OpenAI Realtime');
-        ws.send(JSON.stringify({
-          type:'session.update',
-          session:{
-            modalities:['text','audio'],
-            instructions: systemPrompt,
-            voice: selectedVoice,
-            input_audio_format:'pcm16',
-            output_audio_format:'pcm16',
-            input_audio_transcription:{ model:'whisper-1' },
-            turn_detection:{ type:'server_vad', threshold:0.5, prefix_padding_ms:300, silence_duration_ms:450 },
-            temperature:0.8,
-            max_response_output_tokens:2048
+    try {
+      setStatus('🔄 Iniciando sessão...');
+      
+      // Criar sessão
+      const response = await axios.post(
+        `${CONVAI_API_BASE}/character/getResponse`,
+        {
+          userText: 'Olá!',
+          charID: characterId,
+          sessionID: sessionId || '-1',
+          voiceResponse: true
+        },
+        {
+          headers: {
+            'CONVAI-API-KEY': apiKey,
+            'Content-Type': 'application/json'
           }
-        }));
-      };
-      ws.onmessage=onWSMessage;
-      ws.onerror=(e)=>{ toast('WebSocket erro'); setStatus('❌ Erro WS', false, true) };
-      ws.onclose=()=>{ disconnectWS() };
+        }
+      );
 
-      procNode.onaudioprocess=(e)=>{
-        if(!connected || !ws || ws.readyState!==WebSocket.OPEN || !outgoingEnabled) return;
-        const input=e.inputBuffer.getChannelData(0);
-        const pcm16=f32ToPCM16(input);
-        const b64audio=b64.fromAB(pcm16.buffer);
-        ws.send(JSON.stringify({ type:'input_audio_buffer.append', audio:b64audio }));
-      };
+      if (response.data && response.data.sessionID) {
+        sessionId = response.data.sessionID;
+        setConn(true);
+        setStatus('🟢 Conectado - Fale naturalmente', true);
+        addMsg('system', 'Sessão iniciada com Convai');
+        
+        if (response.data.text) {
+          addMsg('assistant', response.data.text);
+        }
 
-    }catch(err){
-      console.error(err);
-      toast('Falha ao acessar microfone/conectar'); setStatus('❌ Permissão ou conexão falhou', false, true);
+        // Play audio if available
+        if (response.data.audio) {
+          playBase64Audio(response.data.audio);
+        }
+
+        return true;
+      } else {
+        throw new Error('Resposta inválida da API');
+      }
+    } catch (err) {
+      console.error('Erro ao iniciar sessão:', err);
+      toast('Erro ao conectar: ' + (err.response?.data?.message || err.message));
+      setStatus('❌ Erro na conexão', false, true);
+      return false;
     }
   }
 
-  function disconnectWS(){
+  async function sendTextToConvai(text) {
+    if (!sessionId) {
+      const started = await startSession();
+      if (!started) return;
+    }
+
+    try {
+      setStatus('🤔 Processando...', true);
+      
+      const response = await axios.post(
+        `${CONVAI_API_BASE}/character/getResponse`,
+        {
+          userText: text,
+          charID: characterId,
+          sessionID: sessionId,
+          voiceResponse: true
+        },
+        {
+          headers: {
+            'CONVAI-API-KEY': apiKey,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      if (response.data) {
+        if (response.data.text) {
+          addMsg('assistant', response.data.text);
+        }
+
+        if (response.data.audio) {
+          playBase64Audio(response.data.audio);
+        }
+        
+        setStatus('🎤 Pronto para próxima pergunta', true);
+      }
+    } catch (err) {
+      console.error('Erro ao enviar texto:', err);
+      toast('Erro ao processar: ' + (err.response?.data?.message || err.message));
+      setStatus('❌ Erro', false, true);
+    }
+  }
+
+  async function sendAudioToConvai(audioBlob) {
+    if (!sessionId) {
+      const started = await startSession();
+      if (!started) return;
+    }
+
+    try {
+      setStatus('🤔 Processando áudio...', true);
+
+      const formData = new FormData();
+      formData.append('userText', '');
+      formData.append('charID', characterId);
+      formData.append('sessionID', sessionId);
+      formData.append('voiceResponse', 'true');
+      formData.append('audio', audioBlob, 'audio.wav');
+
+      const response = await axios.post(
+        `${CONVAI_API_BASE}/character/getResponse`,
+        formData,
+        {
+          headers: {
+            'CONVAI-API-KEY': apiKey,
+            'Content-Type': 'multipart/form-data'
+          }
+        }
+      );
+
+      if (response.data) {
+        if (response.data.userQuery) {
+          addMsg('user', response.data.userQuery);
+        }
+
+        if (response.data.text) {
+          addMsg('assistant', response.data.text);
+        }
+
+        if (response.data.audio) {
+          playBase64Audio(response.data.audio);
+        }
+        
+        setStatus('🎤 Pronto para próxima pergunta', true);
+      }
+    } catch (err) {
+      console.error('Erro ao enviar áudio:', err);
+      toast('Erro ao processar áudio: ' + (err.response?.data?.message || err.message));
+      setStatus('❌ Erro', false, true);
+    }
+  }
+
+  function playBase64Audio(base64Audio) {
+    try {
+      const audio = new Audio('data:audio/wav;base64,' + base64Audio);
+      audio.play().catch(e => console.error('Erro ao tocar áudio:', e));
+      setStatus('🔊 Assistente falando...', true);
+      
+      audio.onended = () => {
+        setStatus('🎤 Pronto para próxima pergunta', true);
+      };
+    } catch (err) {
+      console.error('Erro ao reproduzir áudio:', err);
+    }
+  }
+
+  // ===================== Audio Recording =====================
+  async function startRecording() {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const srcNode = audioCtx.createMediaStreamSource(stream);
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 1024;
+      srcNode.connect(analyser);
+      startMeter();
+
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        if (audioBlob.size > 1000) { // Only send if there's actual audio
+          await sendAudioToConvai(audioBlob);
+        }
+        audioChunks = [];
+      };
+
+      mediaRecorder.start();
+      isRecording = true;
+      ptt.classList.add('listening');
+      setStatus('🎤 Gravando... (clique novamente para parar)', true);
+      
+    } catch (err) {
+      console.error('Erro ao acessar microfone:', err);
+      toast('Erro ao acessar microfone');
+      setStatus('❌ Permissão negada', false, true);
+    }
+  }
+
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+    }
+    
+    if (stream) {
+      stream.getTracks().forEach(t => t.stop());
+      stream = null;
+    }
+    
+    if (audioCtx) {
+      audioCtx.close();
+      audioCtx = null;
+    }
+    
+    stopMeter();
+    isRecording = false;
+    ptt.classList.remove('listening');
+  }
+
+  function disconnect() {
+    stopRecording();
     setConn(false);
-    if(ws){ try{ ws.close() }catch{} ws=null }
-    if(procNode){ try{ procNode.disconnect() }catch{} procNode=null }
-    if(stream){ try{ stream.getTracks().forEach(t=>t.stop()) }catch{} stream=null }
-    if(audioCtx){ try{ audioCtx.close() }catch{} audioCtx=null }
-    analyser=null; stopMeter();
-    audioQueue=[]; playing=false; currentAssistantDiv=null;
-    ptt.classList.remove('listening'); setStatus('⏸️ Desconectado');
-    addMsg('system','Desconectado');
+    sessionId = '';
+    setStatus('⏸️ Desconectado');
+    addMsg('system', 'Sessão encerrada');
   }
 
-  // ===================== UI events =====================
-  window.addEventListener('load',()=>{
-    const k=localStorage.getItem('openai_realtime_key'); if(k){ keyInput.value=k; apiKey=k; addMsg('system','✅ API Key carregada') }
-    addMsg('assistant','Olá! Configure sua chave e segure o botão para iniciarmos sua sessão de cinema 🎥🍿');
-    setTimeout(()=> addMsg('system','Dica: ESC desconecta; Ctrl/Cmd + Enter alterna conexão'), 1200);
+  // ===================== UI Events =====================
+  window.addEventListener('load', () => {
+    const savedApiKey = localStorage.getItem('convai_api_key');
+    const savedCharId = localStorage.getItem('convai_char_id');
+    
+    if (savedApiKey) {
+      apiKeyInput.value = savedApiKey;
+      apiKey = savedApiKey;
+      addMsg('system', '✅ API Key carregada');
+    }
+    
+    if (savedCharId) {
+      charIdInput.value = savedCharId;
+      characterId = savedCharId;
+      addMsg('system', '✅ Character ID carregado');
+    }
+    
+    addMsg('assistant', 'Olá! Configure sua API Key e Character ID do Convai para começarmos a conversar sobre cinema 🎬🍿');
   });
 
-  keyInput.addEventListener('change',e=>{
-    apiKey=e.target.value.trim();
-    if(apiKey){ localStorage.setItem('openai_realtime_key', apiKey); toast('API key salva localmente') }
-  });
-  voiceSel.addEventListener('change',e=>{
-    if(connected){ toast('Desconecte para trocar de voz'); voiceSel.value=selectedVoice; return }
-    selectedVoice=e.target.value; addMsg('system', `Voz: ${selectedVoice}`);
-  });
-  modelSel.addEventListener('change',e=>{
-    if(connected){ toast('Desconecte para trocar de modelo'); modelSel.value=model; return }
-    model=e.target.value; addMsg('system', `Modelo: ${model}`);
-  });
-
-  ptt.addEventListener('mousedown', async ()=>{
-    if(!connected){ await connectWS() }
-    if(!connected) return;
-    outgoingEnabled=true; ptt.classList.add('listening'); setStatus('🎤 Gravando...', true);
-  });
-  ptt.addEventListener('mouseup', ()=>{
-    if(!connected) return;
-    outgoingEnabled=false; ptt.classList.remove('listening'); setStatus('🤔 Processando...', true);
-    if(ws && ws.readyState===WebSocket.OPEN){
-      ws.send(JSON.stringify({ type:'input_audio_buffer.commit' }));
-      ws.send(JSON.stringify({ type:'response.create' }));
+  apiKeyInput.addEventListener('change', (e) => {
+    apiKey = e.target.value.trim();
+    if (apiKey) {
+      localStorage.setItem('convai_api_key', apiKey);
+      toast('API Key salva');
     }
   });
-  ptt.addEventListener('touchstart', async (e)=>{ e.preventDefault(); if(!connected){ await connectWS() } if(!connected) return; outgoingEnabled=true; ptt.classList.add('listening'); setStatus('🎤 Gravando...', true); }, {passive:false});
-  ptt.addEventListener('touchend', (e)=>{ e.preventDefault(); if(!connected) return; outgoingEnabled=false; ptt.classList.remove('listening'); setStatus('🤔 Processando...', true); if(ws && ws.readyState===WebSocket.OPEN){ ws.send(JSON.stringify({type:'input_audio_buffer.commit'})); ws.send(JSON.stringify({type:'response.create'})); } }, {passive:false});
 
-  function sendText(){
-    const txt=textInput.value.trim(); if(!txt) return;
-    addMsg('user', txt); textInput.value='';
-    if(!connected){ connectWS().then(()=> sendText()) ; return }
-    ws.send(JSON.stringify({
-      type:'conversation.item.create',
-      item:{ type:'message', role:'user', content:[{ type:'input_text', text:txt }] }
-    }));
-    ws.send(JSON.stringify({ type:'response.create' }));
+  charIdInput.addEventListener('change', (e) => {
+    characterId = e.target.value.trim();
+    if (characterId) {
+      localStorage.setItem('convai_char_id', characterId);
+      toast('Character ID salvo');
+    }
+  });
+
+  ptt.addEventListener('click', async () => {
+    if (!connected) {
+      const started = await startSession();
+      if (!started) return;
+    }
+
+    if (isRecording) {
+      stopRecording();
+    } else {
+      await startRecording();
+    }
+  });
+
+  function sendText() {
+    const txt = textInput.value.trim();
+    if (!txt) return;
+    
+    addMsg('user', txt);
+    textInput.value = '';
+    sendTextToConvai(txt);
   }
+
   sendBtn.addEventListener('click', sendText);
-  textInput.addEventListener('keydown',(e)=>{ if(e.key==='Enter') sendText() });
-
-  suggs.addEventListener('click',(e)=>{
-    const d=e.target.closest('.sugg'); if(!d) return;
-    textInput.value=d.dataset.text; sendText();
+  textInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') sendText();
   });
 
-  copyBtn.addEventListener('click', async ()=>{
-    if(!lastAssistantText){ toast('Nada para copiar'); return }
-    await navigator.clipboard.writeText(lastAssistantText); toast('Resposta copiada!');
+  suggs.addEventListener('click', (e) => {
+    const d = e.target.closest('.sugg');
+    if (!d) return;
+    textInput.value = d.dataset.text;
+    sendText();
   });
 
-  clearBtn.addEventListener('click',()=>{
-    if(confirm('Limpar todo o histórico visual?')){ chat.innerHTML=''; addMsg('system','🧹 Histórico limpo') }
+  copyBtn.addEventListener('click', async () => {
+    if (!lastAssistantText) {
+      toast('Nada para copiar');
+      return;
+    }
+    await navigator.clipboard.writeText(lastAssistantText);
+    toast('Resposta copiada!');
   });
 
-  document.addEventListener('keydown',(e)=>{
-    if(e.key==='Escape' && connected) disconnectWS();
-    if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ connected ? disconnectWS() : connectWS() }
+  clearBtn.addEventListener('click', () => {
+    if (confirm('Limpar todo o histórico visual?')) {
+      chat.innerHTML = '';
+      addMsg('system', '🧹 Histórico limpo');
+    }
   });
 
-  window.addEventListener('beforeunload',(e)=>{ if(connected){ e.preventDefault(); e.returnValue='Conexão ativa. Sair mesmo?'; }});
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && connected) disconnect();
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (connected) {
+      e.preventDefault();
+      e.returnValue = 'Sessão ativa. Sair mesmo?';
+    }
+  });
 </script>
 </body>
 </html>
