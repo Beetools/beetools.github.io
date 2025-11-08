@@ -174,7 +174,7 @@
     <aside class="panel">
       <h2>Configuração</h2>
       <div class="field">
-        <label class="label" for="apiKey">🔑 Convai API Key</label>
+        <label class="label" for="apiKey">🔑 Convai API Key </label>
         <input id="apiKey" class="input" type="password" placeholder="Sua API key do Convai..." autocomplete="off" />
         <small class="muted">Obtenha em <a href="https://convai.com/pipeline/dashboard" target="_blank" style="color:var(--brand)">convai.com/pipeline/dashboard</a></small>
       </div>
@@ -335,20 +335,20 @@
 
     try {
       setStatus('🔄 Iniciando sessão...');
-      
-      // Criar sessão
+
+      const formData = new FormData();
+      formData.append('userText', 'Olá!');
+      formData.append('charID', characterId);
+      formData.append('sessionID', sessionId || '-1');
+      formData.append('voiceResponse', 'True'); // string, como na doc
+
       const response = await axios.post(
         `${CONVAI_API_BASE}/character/getResponse`,
-        {
-          userText: 'Olá!',
-          charID: characterId,
-          sessionID: sessionId || '-1',
-          voiceResponse: true
-        },
+        formData,
         {
           headers: {
-            'CONVAI-API-KEY': apiKey,
-            'Content-Type': 'application/json'
+            'CONVAI-API-KEY': apiKey
+            // NÃO setar Content-Type aqui
           }
         }
       );
@@ -358,15 +358,9 @@
         setConn(true);
         setStatus('🟢 Conectado - Fale naturalmente', true);
         addMsg('system', 'Sessão iniciada com Convai');
-        
-        if (response.data.text) {
-          addMsg('assistant', response.data.text);
-        }
 
-        // Play audio if available
-        if (response.data.audio) {
-          playBase64Audio(response.data.audio);
-        }
+        if (response.data.text) addMsg('assistant', response.data.text);
+        if (response.data.audio) playBase64Audio(response.data.audio);
 
         return true;
       } else {
@@ -388,32 +382,26 @@
 
     try {
       setStatus('🤔 Processando...', true);
-      
+
+      const formData = new FormData();
+      formData.append('userText', text);
+      formData.append('charID', characterId);
+      formData.append('sessionID', sessionId);
+      formData.append('voiceResponse', 'True');
+
       const response = await axios.post(
         `${CONVAI_API_BASE}/character/getResponse`,
-        {
-          userText: text,
-          charID: characterId,
-          sessionID: sessionId,
-          voiceResponse: true
-        },
+        formData,
         {
           headers: {
-            'CONVAI-API-KEY': apiKey,
-            'Content-Type': 'application/json'
+            'CONVAI-API-KEY': apiKey
           }
         }
       );
 
       if (response.data) {
-        if (response.data.text) {
-          addMsg('assistant', response.data.text);
-        }
-
-        if (response.data.audio) {
-          playBase64Audio(response.data.audio);
-        }
-        
+        if (response.data.text) addMsg('assistant', response.data.text);
+        if (response.data.audio) playBase64Audio(response.data.audio);
         setStatus('🎤 Pronto para próxima pergunta', true);
       }
     } catch (err) {
@@ -433,42 +421,36 @@
       setStatus('🤔 Processando áudio...', true);
 
       const formData = new FormData();
-      formData.append('userText', '');
+      // IMPORTANTE: só áudio, sem userText
       formData.append('charID', characterId);
       formData.append('sessionID', sessionId);
-      formData.append('voiceResponse', 'true');
-      formData.append('audio', audioBlob, 'audio.wav');
+      formData.append('voiceResponse', 'True');
+      formData.append('file', audioBlob, 'audio.wav'); // nome + tipo corretos
+
+      // opcional, mas alinhado com a doc: sample_rate
+      // se quiser algo mais preciso, podemos extrair do encodeWAV, mas funciona sem também
+      // formData.append('sample_rate', '16000');
 
       const response = await axios.post(
         `${CONVAI_API_BASE}/character/getResponse`,
         formData,
         {
           headers: {
-            'CONVAI-API-KEY': apiKey,
-            'Content-Type': 'multipart/form-data'
+            'CONVAI-API-KEY': apiKey
           }
         }
       );
 
       if (response.data) {
-        if (response.data.userQuery) {
-          addMsg('user', response.data.userQuery);
-        }
-
-        if (response.data.text) {
-          addMsg('assistant', response.data.text);
-        }
-
-        if (response.data.audio) {
-          playBase64Audio(response.data.audio);
-        }
-        
+        if (response.data.userQuery) addMsg('user', response.data.userQuery);
+        if (response.data.text) addMsg('assistant', response.data.text);
+        if (response.data.audio) playBase64Audio(response.data.audio);
         setStatus('🎤 Pronto para próxima pergunta', true);
       }
     } catch (err) {
       console.error('Erro ao enviar áudio:', err);
       toast('Erro ao processar áudio: ' + (err.response?.data?.message || err.message));
-      setStatus('❌ Erro', false, true);
+      setStatus('❌ Erro ao processar áudio', false, true);
     }
   }
 
@@ -477,13 +459,66 @@
       const audio = new Audio('data:audio/wav;base64,' + base64Audio);
       audio.play().catch(e => console.error('Erro ao tocar áudio:', e));
       setStatus('🔊 Assistente falando...', true);
-      
+
       audio.onended = () => {
         setStatus('🎤 Pronto para próxima pergunta', true);
       };
     } catch (err) {
       console.error('Erro ao reproduzir áudio:', err);
     }
+  }
+  
+  async function blobToWav(blob) {
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+    const wavBuffer = encodeWAV(audioBuffer);
+    await audioCtx.close();
+
+    return new Blob([wavBuffer], { type: 'audio/wav' });
+  }
+
+  function encodeWAV(audioBuffer) {
+    const numChannels = 1; // mono
+    const sampleRate = audioBuffer.sampleRate;
+    const channelData = audioBuffer.getChannelData(0); // usa só o canal L
+    const samples = channelData.length;
+
+    const buffer = new ArrayBuffer(44 + samples * 2);
+    const view = new DataView(buffer);
+
+    // helper
+    function writeString(offset, str) {
+      for (let i = 0; i < str.length; i++) {
+        view.setUint8(offset + i, str.charCodeAt(i));
+      }
+    }
+
+    // RIFF header
+    writeString(0, 'RIFF');
+    view.setUint32(4, 36 + samples * 2, true);
+    writeString(8, 'WAVE');
+    writeString(12, 'fmt ');
+    view.setUint32(16, 16, true); // Subchunk1Size (PCM)
+    view.setUint16(20, 1, true);  // AudioFormat = 1 (PCM)
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * numChannels * 2, true); // ByteRate
+    view.setUint16(32, numChannels * 2, true); // BlockAlign
+    view.setUint16(34, 16, true); // BitsPerSample
+    writeString(36, 'data');
+    view.setUint32(40, samples * 2, true);
+
+    // PCM 16-bit
+    let offset = 44;
+    for (let i = 0; i < samples; i++) {
+      let s = Math.max(-1, Math.min(1, channelData[i]));
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      offset += 2;
+    }
+
+    return buffer;
   }
 
   // ===================== Audio Recording =====================
@@ -504,34 +539,57 @@
       srcNode.connect(analyser);
       startMeter();
 
-      mediaRecorder = new MediaRecorder(stream);
+      // Tenta usar webm/opus explicitamente (a maioria dos browsers suporta)
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+        ? 'audio/webm;codecs=opus'
+        : (MediaRecorder.isTypeSupported('audio/webm')
+          ? 'audio/webm'
+          : '');
+
+      mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       audioChunks = [];
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          audioChunks.push(e.data);
-        }
+        if (e.data.size > 0) audioChunks.push(e.data);
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-        if (audioBlob.size > 1000) { // Only send if there's actual audio
-          await sendAudioToConvai(audioBlob);
+        if (!audioChunks.length) {
+          audioChunks = [];
+          return;
         }
+
+        const blobType = mediaRecorder.mimeType || 'audio/webm';
+        const rawBlob = new Blob(audioChunks, { type: blobType });
+
         audioChunks = [];
+
+        if (rawBlob.size <= 2048) {
+          return;
+        }
+
+        try {
+          const wavBlob = await blobToWav(rawBlob);
+          await sendAudioToConvai(wavBlob);
+        } catch (err) {
+          console.error('Erro ao converter para WAV:', err);
+          toast('Erro ao converter áudio');
+          setStatus('❌ Erro ao converter áudio', false, true);
+        }
       };
 
       mediaRecorder.start();
       isRecording = true;
       ptt.classList.add('listening');
       setStatus('🎤 Gravando... (clique novamente para parar)', true);
-      
+
     } catch (err) {
       console.error('Erro ao acessar microfone:', err);
       toast('Erro ao acessar microfone');
-      setStatus('❌ Permissão negada', false, true);
+      setStatus('❌ Permissão negada ou erro no microfone', false, true);
     }
   }
+
 
   function stopRecording() {
     if (mediaRecorder && mediaRecorder.state === 'recording') {
