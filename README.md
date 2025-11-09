@@ -1,70 +1,109 @@
-# CineTalk - Realtime Voice
+# 🎬 CineTalk – Multi-Chatbot Voice Assistant
 
-Aplicação de chat de voz em tempo real usando OpenAI Realtime API.
+Aplicação web de **chat de voz em tempo real** com suporte a **OpenAI (ChatGPT)**, **Convai** e **Gemini**, permitindo conversas naturais, respostas faladas e recomendações de filmes com diferentes personalidades de assistente.
+
+---
 
 ## 🚀 Deploy no GitHub Pages
 
-Este site está hospedado no GitHub Pages: `https://beetools.github.io`
+O projeto está hospedado em:  
+👉 **[https://beetools.github.io](https://beetools.github.io)**
 
-### Configuração
+---
 
-O repositório está configurado com:
-- ✅ Arquivo `.nojekyll` para evitar processamento Jekyll
-- ✅ Arquivo `index.html` na raiz do repositório
-- ✅ Branch `main` como fonte do GitHub Pages
+## 🧩 Estrutura do Projeto
 
-### Como atualizar o site
+O código foi totalmente modularizado:
 
-1. Faça suas alterações no `index.html`
-2. Commit as mudanças:
+```
+/index.html              → estrutura base e containers
+/css/style.css           → estilos globais e temas
+/js/main.js              → controle da UI, troca de provedores e persistência de dados
+/js/provider-chatgpt.js  → integração com OpenAI API (ChatGPT)
+/js/provider-gemini.js   → integração futura com Gemini API
+/js/provider-convai.js   → integração com Convai (voz + Character ID)
+```
+
+Essa separação facilita a manutenção, depuração e adição de novos chatbots no futuro.
+
+---
+
+## 🤖 Chatbots Suportados
+
+| Provedor  | API utilizada | Recursos principais |
+|------------|---------------|--------------------|
+| **ChatGPT** | OpenAI Realtime / Completions | Respostas rápidas com voz (TTS) e personalidade ajustável |
+| **Convai** | Convai Character API | Personagem 3D com voz real e `Character ID` configurável |
+| **Gemini** | Google Gemini API | Estrutura pronta para integração futura |
+
+---
+
+## ⚙️ Como Atualizar o Site
+
+1. Faça suas alterações no repositório local:
    ```bash
    git add .
-   git commit -m "Descrição das mudanças"
-   ```
-3. Envie para o GitHub:
-   ```bash
+   git commit -m "feat: descrição das mudanças"
    git push origin main
    ```
-4. O GitHub Pages irá automaticamente fazer deploy das mudanças (geralmente leva de alguns segundos a 2 minutos)
 
-### Verificar o status do deploy
+2. O GitHub Pages fará o deploy automático (normalmente leva 1–2 minutos).
 
-Acesse: `https://github.com/Beetools/beetools.github.io/actions`
+📍 **Status do deploy:**  
+[https://github.com/Beetools/beetools.github.io/actions](https://github.com/Beetools/beetools.github.io/actions)
 
-## 📋 Sobre o Projeto
+---
 
-**CineTalk** é um assistente de cinema em tempo real que usa:
-- OpenAI Realtime API para conversação por voz
-- WebSocket para comunicação bidirecional
-- VAD (Voice Activity Detection) no servidor
-- Interface moderna e responsiva
+## 🧠 Configuração e Uso
 
-## 🔑 Configuração da API
+### 1. Selecione o provedor
+No topo da página, escolha entre **ChatGPT**, **Gemini** ou **Convai**.
 
-Para usar a aplicação, você precisa de uma chave da OpenAI API:
-1. Acesse o site
-2. Insira sua API key no campo indicado
-3. Segure o botão do microfone para falar
+### 2. Configure suas credenciais
+- Para ChatGPT: insira sua **OpenAI API Key**.
+- Para Convai: insira a **Convai API Key** e o **Character ID**.
 
-⚠️ **Aviso de Segurança**: Em produção, sempre use um token efêmero gerado no backend. Nunca exponha sua API key diretamente no browser.
+> 💡 As chaves são salvas localmente no navegador e não são compartilhadas.
 
-## 🎨 Recursos
+### 3. Converse por texto ou voz
+- Digite uma pergunta ou pressione o botão 🎤 para gravar sua fala.
+- O assistente responderá em texto e/ou voz, conforme o provedor selecionado.
 
-- 🎤 Conversação por voz em tempo real
-- 💬 Chat de texto alternativo
-- 🎙️ Seleção de diferentes vozes
-- 📊 Visualização de áudio em tempo real
-- 💾 Histórico de conversas
-- 📋 Copiar respostas
-- 🎬 Sugestões de perguntas sobre cinema
+⚠️ **Importante:** em ambiente de produção, use **tokens efêmeros** e um **servidor intermediário** — nunca exponha suas chaves diretamente no front-end.
 
-## 🛠️ Tecnologias
+---
 
-- HTML5, CSS3, JavaScript (Vanilla)
-- WebSocket API
-- Web Audio API
-- OpenAI Realtime API
+## 🎨 Funcionalidades
 
-## 📝 Licença
+- 💬 Chat de texto e voz com múltiplos provedores  
+- 🧠 Personalidade configurável (ChatGPT / Convai)  
+- 🎙️ Gravação e reprodução de áudio em tempo real  
+- 🔊 Visualizador de nível de áudio (VU meter)  
+- 📋 Copiar respostas  
+- 🧹 Limpar histórico  
+- 🎬 Sugestões de perguntas sobre cinema  
+- 🚫 Prevenção de mensagens duplicadas (Convai)  
 
-Este projeto é para fins educacionais e demonstração.
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **HTML5**, **CSS3**, **JavaScript (Vanilla)**
+- **OpenAI API**, **Convai API**, **Google Gemini API**
+- **Web Audio API** (gravação, reprodução e visualização)
+- **LocalStorage** (salvar chaves e configurações)
+- **Axios** (requisições HTTP)
+- **GitHub Pages** (deploy automático)
+
+---
+
+## 📦 Estrutura de Branches
+
+- `main` → versão estável e publicada  
+- `feat/multi-chatbot-architecture` → versão atual com modularização e novos provedores  
+
+---
+
+## 🧾 Licença
+
+Este projeto é de uso **educacional e demonstrativo**, voltado a aplicações de IA generativa e interação por voz.
