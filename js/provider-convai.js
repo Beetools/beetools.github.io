@@ -104,6 +104,20 @@ window.ConvaiProvider = function (createDeps) {
 
       setStatus('🎤 Pronto para próxima pergunta', true);
     } catch (err) {
+      const rawMsg =
+        err.response?.data?.message ||
+        err.message ||
+        '';
+
+      // Tratamento específico para voz não configurada
+      if (rawMsg.includes('Unable to generate audio response')) {
+        toast('Convai: não foi possível gerar áudio. Verifique se o personagem tem uma voz configurada no painel. A resposta de texto continua normalmente.');
+        setStatus('⚠️ Convai sem voz de TTS válida', false, true);
+        // não derruba a sessão, só avisa
+        return;
+      }
+
+      // Demais erros: usa o handler genérico
       if (window.ApiErrorHandler) {
         window.ApiErrorHandler.handle(err, {
           provider: 'Convai',
@@ -112,7 +126,7 @@ window.ConvaiProvider = function (createDeps) {
         });
       } else {
         console.error('Erro Convai (sendText):', err);
-        toast('Erro Convai: ' + (err.response?.data?.message || err.message));
+        toast('Erro Convai: ' + rawMsg || 'Erro desconhecido.');
         setStatus('❌ Erro Convai', false, true);
       }
     }
@@ -161,28 +175,30 @@ window.ConvaiProvider = function (createDeps) {
       }
 
       setStatus('🎤 Pronto para próxima pergunta', true);
-    } catch (err) {
-      console.error(
-        'Convai sendAudio error:',
-        err.response?.status,
-        err.response?.data || err.message
-      );
-
-      if (window.ApiErrorHandler) {
-        window.ApiErrorHandler.handle(err, {
-          provider: 'Convai',
-          toast,
-          setStatus
-        });
-      } else {
-        const msg =
+      } catch (err) {
+        const rawMsg =
           err.response?.data?.message ||
           err.message ||
-          'Erro desconhecido ao falar com o Convai.';
-        toast('Erro Convai: ' + msg);
-        setStatus('❌ Erro Convai', false, true);
+          '';
+
+        if (rawMsg.includes('Unable to generate audio response')) {
+          toast('Convai: não foi possível gerar o áudio desta fala. Verifique a voz configurada do personagem.');
+          setStatus('⚠️ Convai sem voz de TTS válida', false, true);
+          return;
+        }
+
+        if (window.ApiErrorHandler) {
+          window.ApiErrorHandler.handle(err, {
+            provider: 'Convai',
+            toast,
+            setStatus
+          });
+        } else {
+          console.error('Convai sendAudio error:', err);
+          toast('Erro Convai: ' + rawMsg || 'Erro desconhecido.');
+          setStatus('❌ Erro Convai', false, true);
+        }
       }
-    }
   }
 
   function playConvaiAudio(base64Audio) {
