@@ -1,6 +1,6 @@
 // js/provider-convai.js
 
-window.ConvaiProvider = function(createDeps) {
+window.ConvaiProvider = function (createDeps) {
   const { axios, setStatus, addMsg, toast } = createDeps;
   const BASE = 'https://api.convai.com';
 
@@ -10,24 +10,24 @@ window.ConvaiProvider = function(createDeps) {
   let lastAssistantText = '';
   let lastAssistantTime = 0;
 
-  function addAssistantOnce(text) {
-    if (!text) return;
-    const now = Date.now();
-    // evita duplicar a mesma resposta em janela de 5 segundos
-    if (text === lastAssistantText && (now - lastAssistantTime) < 5000) {
-      return;
-    }
-    addMsg('assistant', text);
-    lastAssistantText = text;
-    lastAssistantTime = now;
-  }
-
   function setApiKey(key) {
     apiKey = key;
   }
 
   function setCharId(id) {
     charId = id;
+  }
+
+  // evita respostas duplicadas em sequência
+  function addAssistantOnce(text) {
+    if (!text) return;
+    const now = Date.now();
+    if (text === lastAssistantText && now - lastAssistantTime < 5000) {
+      return;
+    }
+    addMsg('assistant', text);
+    lastAssistantText = text;
+    lastAssistantTime = now;
   }
 
   async function startSession() {
@@ -61,9 +61,17 @@ window.ConvaiProvider = function(createDeps) {
 
       throw new Error('Resposta inválida da API Convai');
     } catch (err) {
-      console.error(err);
-      toast('Erro Convai: ' + (err.response?.data?.message || err.message));
-      setStatus('❌ Erro Convai', false, true);
+      if (window.ApiErrorHandler) {
+        window.ApiErrorHandler.handle(err, {
+          provider: 'Convai',
+          toast,
+          setStatus
+        });
+      } else {
+        console.error('Erro Convai (startSession):', err);
+        toast('Erro Convai: ' + (err.response?.data?.message || err.message));
+        setStatus('❌ Erro Convai', false, true);
+      }
       return false;
     }
   }
@@ -92,14 +100,21 @@ window.ConvaiProvider = function(createDeps) {
       });
 
       if (res.data?.text) addAssistantOnce(res.data.text);
-      if (res.data?.audio) {
-        playConvaiAudio(res.data.audio);
-      }
+      if (res.data?.audio) playConvaiAudio(res.data.audio);
+
       setStatus('🎤 Pronto para próxima pergunta', true);
     } catch (err) {
-      console.error(err);
-      toast('Erro Convai: ' + (err.response?.data?.message || err.message));
-      setStatus('❌ Erro Convai', false, true);
+      if (window.ApiErrorHandler) {
+        window.ApiErrorHandler.handle(err, {
+          provider: 'Convai',
+          toast,
+          setStatus
+        });
+      } else {
+        console.error('Erro Convai (sendText):', err);
+        toast('Erro Convai: ' + (err.response?.data?.message || err.message));
+        setStatus('❌ Erro Convai', false, true);
+      }
     }
   }
 
@@ -117,42 +132,92 @@ window.ConvaiProvider = function(createDeps) {
       setStatus('🤔 Processando áudio Convai...', true);
 
       const fd = new FormData();
+
+      // 🔹 Áudio usa SOMENTE file, sem userText
       fd.append('charID', charId);
       fd.append('sessionID', sessionId);
       fd.append('voiceResponse', 'True');
+
+      // Se seu encodeWAV gera 16k mono, mantém:
+      fd.append('sample_rate', '16000');
+
+      // 🔹 Nome de campo correto segundo a doc: file
       fd.append('file', wavBlob, 'audio.wav');
 
       const res = await axios.post(`${BASE}/character/getResponse`, fd, {
         headers: { 'CONVAI-API-KEY': apiKey }
       });
 
-      if (res.data?.userQuery) addMsg('user', res.data.userQuery);
-      if (res.data?.text) addAssistantOnce(res.data.text);
-      if (res.data?.audio) playConvaiAudio(res.data.audio);
+      console.log('Convai audio response:', res.data);
+
+      if (res.data?.userQuery) {
+        addMsg('user', res.data.userQuery);
+      }
+      if (res.data?.text) {
+        addAssistantOnce(res.data.text);
+      }
+      if (res.data?.audio) {
+        playConvaiAudio(res.data.audio);
+      }
+
       setStatus('🎤 Pronto para próxima pergunta', true);
     } catch (err) {
-      console.error(err);
-      toast('Erro Convai: ' + (err.response?.data?.message || err.message));
-      setStatus('❌ Erro Convai', false, true);
+      console.error(
+        'Convai sendAudio error:',
+        err.response?.status,
+        err.response?.data || err.message
+      );
+
+      if (window.ApiErrorHandler) {
+        window.ApiErrorHandler.handle(err, {
+          provider: 'Convai',
+          toast,
+          setStatus
+        });
+      } else {
+        const msg =
+          err.response?.data?.message ||
+          err.message ||
+          'Erro desconhecido ao falar com o Convai.';
+        toast('Erro Convai: ' + msg);
+        setStatus('❌ Erro Convai', false, true);
+      }
+    }
+  }
+
+  function playConvaiAudio(base64Audio) {
+    if (!base64Audio) return;
+
+    try {
+      if (window.AudioQueue) {
+        window.AudioQueue.enqueue({
+          base64: base64Audio,
+          mime: 'audio/wav'
+        });
+      } else {
+        const audio = new Audio('data:audio/wav;base64,' + base64Audio);
+        audio.play().catch(err => {
+          console.error('Erro ao tocar áudio Convai:', err);
+        });
+      }
+    } catch (err) {
+      console.error('Erro ao reproduzir áudio Convai:', err);
     }
   }
 
   function reset() {
     sessionId = '';
-    // mantemos apiKey e charId; usuário não precisa digitar de novo ao trocar de provedor
+    // mantemos apiKey e charId para o usuário não precisar reconfigurar
   }
 
-  function playConvaiAudio(base64Audio) {
-    if (!base64Audio) return;
-    try {
-        const audio = new Audio('data:audio/wav;base64,' + base64Audio);
-        audio.play().catch(err => console.error('Erro ao tocar áudio Convai:', err));
-    } catch (err) {
-        console.error('Erro ao reproduzir áudio Convai:', err);
+  async function welcome() {
+    if (!apiKey || !charId) return;
+    if (!sessionId) {
+      await startSession(); // já gera texto + áudio de boas-vindas do personagem
     }
   }
 
-  return {
+   return {
     id: 'convai',
     label: 'Convai',
     setApiKey,
@@ -160,7 +225,9 @@ window.ConvaiProvider = function(createDeps) {
     sendText,
     sendAudio,
     reset,
+    welcome, // 👈
     placeholderKey: 'Convai API Key',
-    helpText: 'Use a Convai API Key e informe o Character ID no campo abaixo.'
+    helpText:
+      'Use a Convai API Key e informe o Character ID no campo abaixo.'
   };
 };
