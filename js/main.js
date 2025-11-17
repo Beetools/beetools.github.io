@@ -1,5 +1,3 @@
-// js/main.js
-
 (function () {
   // ===== helpers =====
   function get(id) {
@@ -24,8 +22,6 @@
   const systemPromptInput = get('systemPrompt');
   const textInput = get('textInput');
   const sendBtn = get('sendBtn');
-  const clearBtn = get('clearBtn');
-  const copyBtn = get('copyBtn');
   const toasts = get('toasts');
   const meter = get('meter');
   const suggs = get('suggs');
@@ -77,8 +73,7 @@
 
   function setStatus(txt, ok = false, err = false) {
     statusEl.textContent = txt;
-    statusEl.className =
-      'status' + (ok ? ' ok' : '') + (err ? ' err' : '');
+    statusEl.className = 'status' + (ok ? ' ok' : '') + (err ? ' err' : '');
   }
 
   function setConn(on) {
@@ -88,12 +83,7 @@
   }
 
   // ===== deps para providers =====
-  const createDeps = {
-    axios,
-    setStatus,
-    addMsg,
-    toast
-  };
+  const createDeps = { axios, setStatus, addMsg, toast };
 
   const providers = {
     chatgpt: window.ChatGPTProvider(createDeps),
@@ -118,52 +108,45 @@
     apiKeyInput.placeholder = current.placeholderKey || '';
     apiKeyHelp.textContent = current.helpText || '';
 
-    // Character ID só aparece para Convai
     if (current.id === 'convai') {
       charIdField.style.display = 'grid';
-
-      const savedChar =
-        localStorage.getItem('cinetalk_convai_charid') || '';
-      if (savedChar && typeof current.setCharId === 'function') {
+      const savedChar = localStorage.getItem('cinetalk_convai_charid') || '';
+      if (savedChar) {
         charIdInput.value = savedChar;
         current.setCharId(savedChar);
       }
 
-      const savedKey =
-        localStorage.getItem('cinetalk_api_key_convai') || '';
+      const savedKey = localStorage.getItem('cinetalk_api_key_convai') || '';
       if (savedKey) {
         apiKeyInput.value = savedKey;
         current.setApiKey(savedKey);
       }
-    } else {
+    } else if (current.id === 'chatgpt') {
       charIdField.style.display = 'none';
-
-      if (current.id === 'chatgpt') {
-        const saved =
-          localStorage.getItem('cinetalk_api_key_chatgpt') || '';
-        if (saved) {
-          apiKeyInput.value = saved;
-          current.setApiKey(saved);
-        }
+      const savedKey = localStorage.getItem('cinetalk_api_key_chatgpt') || '';
+      if (savedKey) {
+        apiKeyInput.value = savedKey;
+        current.setApiKey(savedKey);
       }
-      // Gemini: usa o valor informado pelo usuário (API/URL) quando setado
+    } else if (current.id === 'gemini') {
+      charIdField.style.display = 'none';
+      const savedKey = localStorage.getItem('cinetalk_api_key_gemini') || '';
+      if (savedKey) {
+        apiKeyInput.value = savedKey;
+        current.setApiKey(savedKey);
+      }
     }
 
     setConn(false);
     setStatus('Configure a API Key para começar');
   }
 
-  // ===== provider switch (5.2) =====
+  // ===== provider switch =====
   function switchProvider(id) {
     const next = providers[id];
     if (!next || next === current) return;
 
-    // para qualquer áudio em reprodução
-    if (window.AudioQueue) {
-      window.AudioQueue.stop();
-    }
-
-    // encerra sessão / contexto do provedor atual
+    if (window.AudioQueue) window.AudioQueue.stop();
     if (current && typeof current.reset === 'function') {
       current.reset(systemPromptInput.value.trim());
     }
@@ -171,34 +154,51 @@
     current = next;
     hasPlayedWelcome = false;
 
-    // visual: botão ativo
     providerBtns.forEach((b) =>
-      b.classList.toggle(
-        'active',
-        b.dataset.provider === current.id
-      )
+      b.classList.toggle('active', b.dataset.provider === current.id)
     );
 
     updateProviderUI();
     addMsg('system', `Provedor alterado para ${current.label}.`);
 
-    // boas-vindas do novo provedor
-    if (
-      current &&
-      typeof current.welcome === 'function' &&
-      !hasPlayedWelcome
-    ) {
+    if (current && typeof current.welcome === 'function' && !hasPlayedWelcome) {
       current.welcome();
       hasPlayedWelcome = true;
     }
   }
 
-  providerBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
+  // 🔄 Garantir que troca de provider atualize o objeto e a UI
+  const switchWrap = document.getElementById('providerSwitch');
+  if (switchWrap) {
+    switchWrap.addEventListener('click', (e) => {
+      const btn = e.target.closest('.provider-btn');
+      if (!btn) return;
+      e.preventDefault();
+
       const id = btn.dataset.provider;
-      switchProvider(id);
+      const next = providers[id];
+      if (!next || next === current) return;
+
+      // Para qualquer áudio ativo
+      if (window.AudioQueue) window.AudioQueue.stop();
+
+      // Atualiza o objeto corrente
+      current = next;
+
+      // Atualiza estado visual dos botões
+      providerBtns.forEach((b) =>
+        b.classList.toggle('active', b.dataset.provider === current.id)
+      );
+
+      // Recarrega as chaves e placeholders
+      updateProviderUI();
+
+      addMsg('system', `Provedor alterado para ${current.label}.`);
+
+      // Mensagem de boas-vindas
+      if (current && typeof current.welcome === 'function') current.welcome();
     });
-  });
+  }
 
   // ===== audio visuals =====
   function startMeter() {
@@ -210,12 +210,8 @@
       const step = Math.floor(arr.length / bars.length);
       bars.forEach((b, i) => {
         const slice = arr.slice(i * step, (i + 1) * step);
-        const avg =
-          slice.reduce((a, c) => a + c, 0) / slice.length || 0;
-        const h = Math.max(
-          6,
-          Math.min(52, (avg / 255) * 56)
-        );
+        const avg = slice.reduce((a, c) => a + c, 0) / slice.length || 0;
+        const h = Math.max(6, Math.min(52, (avg / 255) * 56));
         b.style.height = `${h}px`;
       });
       rafId = requestAnimationFrame(loop);
@@ -233,8 +229,7 @@
   // ===== WAV conversion =====
   async function blobToWav(blob) {
     const arrayBuffer = await blob.arrayBuffer();
-    const ctx = new (window.AudioContext ||
-      window.webkitAudioContext)();
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
     const wavBuffer = encodeWAV(audioBuffer);
     await ctx.close();
@@ -244,7 +239,7 @@
   function encodeWAV(audioBuffer) {
     const numChannels = 1;
     const inputRate = audioBuffer.sampleRate;
-    const targetRate = 16000; // 🔹 força 16k para Convai / STT
+    const targetRate = 16000;
     const inputData = audioBuffer.getChannelData(0);
     const sampleRateRatio = inputRate / targetRate;
 
@@ -253,37 +248,29 @@
     const view = new DataView(buffer);
 
     function writeString(offset, str) {
-      for (let i = 0; i < str.length; i++) {
-        view.setUint8(offset + i, str.charCodeAt(i));
-      }
+      for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
     }
 
-    // RIFF header
     writeString(0, 'RIFF');
     view.setUint32(4, 36 + samples * 2, true);
     writeString(8, 'WAVE');
     writeString(12, 'fmt ');
-    view.setUint32(16, 16, true); // Subchunk1Size
-    view.setUint16(20, 1, true);  // PCM
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
     view.setUint16(22, numChannels, true);
-    view.setUint32(24, targetRate, true); // 🔹 SampleRate fixo 16k
-    view.setUint32(28, targetRate * numChannels * 2, true); // ByteRate
-    view.setUint16(32, numChannels * 2, true); // BlockAlign
-    view.setUint16(34, 16, true); // BitsPerSample
+    view.setUint32(24, targetRate, true);
+    view.setUint32(28, targetRate * numChannels * 2, true);
+    view.setUint16(32, numChannels * 2, true);
+    view.setUint16(34, 16, true);
     writeString(36, 'data');
     view.setUint32(40, samples * 2, true);
 
-    // downsample + PCM 16-bit
     let offset = 44;
     let pos = 0;
     for (let i = 0; i < samples; i++) {
       const idx = Math.floor(pos);
       const s = Math.max(-1, Math.min(1, inputData[idx] || 0));
-      view.setInt16(
-        offset,
-        s < 0 ? s * 0x8000 : s * 0x7fff,
-        true
-      );
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
       offset += 2;
       pos += sampleRateRatio;
     }
@@ -301,33 +288,23 @@
 
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        }
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
       });
 
-      audioCtx = new (window.AudioContext ||
-        window.webkitAudioContext)();
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const src = audioCtx.createMediaStreamSource(stream);
       analyser = audioCtx.createAnalyser();
       analyser.fftSize = 1024;
       src.connect(analyser);
       startMeter();
 
-      const mimeType = MediaRecorder.isTypeSupported(
-        'audio/webm;codecs=opus'
-      )
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
         ? 'audio/webm;codecs=opus'
         : MediaRecorder.isTypeSupported('audio/webm')
         ? 'audio/webm'
         : '';
 
-      mediaRecorder = new MediaRecorder(
-        stream,
-        mimeType ? { mimeType } : undefined
-      );
+      mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
       audioChunks = [];
 
       mediaRecorder.ondataavailable = (e) => {
@@ -340,27 +317,15 @@
           return;
         }
 
-        const blobType = mediaRecorder.mimeType || 'audio/webm';
-        const raw = new Blob(audioChunks, { type: blobType });
+        const raw = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
         audioChunks = [];
-
         if (raw.size <= 2048) return;
 
         try {
-          const systemPrompt = systemPromptInput.value.trim();
+          const wav = await blobToWav(raw);
           const key = apiKeyInput.value.trim();
           current.setApiKey(key);
-
-          if (current.id === 'convai') {
-            // Convai: converte para WAV (mais compatível) e envia
-            const wav = await blobToWav(raw);
-            await current.sendAudio({ wavBlob: wav });
-          } else {
-            // ChatGPT / outros: também usam WAV para STT
-            const wav = await blobToWav(raw);
-            await current.sendAudio({ wavBlob: wav, systemPrompt });
-          }
-
+          await current.sendAudio({ wavBlob: wav });
           setConn(true);
         } catch (err) {
           console.error(err);
@@ -372,33 +337,19 @@
       mediaRecorder.start();
       isRecording = true;
       ptt.classList.add('listening');
-      setStatus(
-        '🎤 Gravando... (clique novamente para parar)',
-        true
-      );
+      setStatus('🎤 Gravando... (clique novamente para parar)', true);
       setConn(true);
     } catch (err) {
       console.error(err);
       toast('Erro ao acessar microfone');
-      setStatus(
-        '❌ Permissão negada ou erro no microfone',
-        false,
-        true
-      );
+      setStatus('❌ Permissão negada ou erro no microfone', false, true);
     }
   }
 
   function stopRecording() {
-    if (
-      mediaRecorder &&
-      mediaRecorder.state === 'recording'
-    ) {
-      mediaRecorder.stop();
-    }
+    if (mediaRecorder && mediaRecorder.state === 'recording') mediaRecorder.stop();
     if (stream) {
-      stream
-        .getTracks()
-        .forEach((t) => t.stop());
+      stream.getTracks().forEach((t) => t.stop());
       stream = null;
     }
     if (audioCtx) {
@@ -410,110 +361,7 @@
     ptt.classList.remove('listening');
   }
 
-  function disconnect() {
-    stopRecording();
-    if (window.AudioQueue) {
-      window.AudioQueue.stop();
-    }
-    setConn(false);
-    setStatus('⏸️ Desconectado');
-    if (current && current.reset) {
-      current.reset(systemPromptInput.value.trim());
-    }
-    addMsg('system', 'Sessão encerrada.');
-  }
-
-  // ===== UI events =====
-
-  // 5.3: boas-vindas automáticas após carregar
-  window.addEventListener('load', () => {
-    // definir provider padrão como ChatGPT visualmente
-    providerBtns.forEach((b) => {
-      b.classList.toggle(
-        'active',
-        b.dataset.provider === 'chatgpt'
-      );
-    });
-
-    // carregar API Key do ChatGPT se existir
-    const savedChat = localStorage.getItem(
-      'cinetalk_api_key_chatgpt'
-    );
-    if (savedChat && current.id === 'chatgpt') {
-      apiKeyInput.value = savedChat;
-      current.setApiKey(savedChat);
-      addMsg(
-        'system',
-        '✅ OpenAI API Key carregada (local).'
-      );
-    }
-
-    updateProviderUI();
-
-    // boas-vindas do provedor atual (se implementado)
-    if (
-      current &&
-      typeof current.welcome === 'function' &&
-      !hasPlayedWelcome
-    ) {
-      current.welcome();
-      hasPlayedWelcome = true;
-    }
-  });
-
-  apiKeyInput.addEventListener('change', () => {
-    const key = apiKeyInput.value.trim();
-    current.setApiKey(key);
-
-    if (current.id === 'chatgpt') {
-      localStorage.setItem(
-        'cinetalk_api_key_chatgpt',
-        key
-      );
-    } else if (current.id === 'convai') {
-      localStorage.setItem(
-        'cinetalk_api_key_convai',
-        key
-      );
-    }
-
-    toast('API Key aplicada ao provedor atual.');
-  });
-
-  charIdInput.addEventListener('change', () => {
-    const id = charIdInput.value.trim();
-    Object.values(providers).forEach((p) => {
-      if (
-        p.id === 'convai' &&
-        typeof p.setCharId === 'function'
-      ) {
-        p.setCharId(id);
-      }
-    });
-    localStorage.setItem(
-      'cinetalk_convai_charid',
-      id
-    );
-    toast('Character ID do Convai salvo.');
-  });
-
-  systemPromptInput.addEventListener('change', () => {
-    if (current && current.reset) {
-      current.reset(systemPromptInput.value.trim());
-      toast(
-        'Personalidade atualizada para este provedor.'
-      );
-    }
-  });
-
-  ptt.addEventListener('click', async () => {
-    if (isRecording) {
-      stopRecording();
-    } else {
-      await startRecording();
-    }
-  });
-
+  // ===== envio de texto =====
   function sendText() {
     const txt = textInput.value.trim();
     if (!txt) return;
@@ -528,13 +376,52 @@
     addMsg('user', txt);
     textInput.value = '';
 
-    current.sendText({
-      text: txt,
-      systemPrompt: systemPromptInput.value.trim()
-    });
-
+    current.sendText({ text: txt, systemPrompt: systemPromptInput?.value?.trim() || '' });
     setConn(true);
   }
+
+  // ===== UI Events =====
+  window.addEventListener('load', () => {
+    providerBtns.forEach((b) =>
+      b.classList.toggle('active', b.dataset.provider === 'chatgpt')
+    );
+
+    const savedChat = localStorage.getItem('cinetalk_api_key_chatgpt');
+    if (savedChat && current.id === 'chatgpt') {
+      apiKeyInput.value = savedChat;
+      current.setApiKey(savedChat);
+      addMsg('system', '✅ OpenAI API Key carregada (local).');
+    }
+
+    updateProviderUI();
+
+    if (current && typeof current.welcome === 'function' && !hasPlayedWelcome) {
+      current.welcome();
+      hasPlayedWelcome = true;
+    }
+  });
+
+  apiKeyInput.addEventListener('change', () => {
+    const key = apiKeyInput.value.trim();
+    current.setApiKey(key);
+    const storeName = `cinetalk_api_key_${current.id}`;
+    localStorage.setItem(storeName, key);
+    toast('API Key salva para ' + current.label);
+  });
+
+  charIdInput.addEventListener('change', () => {
+    const id = charIdInput.value.trim();
+    if (current.id === 'convai' && typeof current.setCharId === 'function') {
+      current.setCharId(id);
+      localStorage.setItem('cinetalk_convai_charid', id);
+      toast('Character ID do Convai salvo.');
+    }
+  });
+
+  ptt.addEventListener('click', async () => {
+    if (isRecording) stopRecording();
+    else await startRecording();
+  });
 
   sendBtn.addEventListener('click', sendText);
   textInput.addEventListener('keydown', (e) => {
@@ -548,37 +435,13 @@
     sendText();
   });
 
-  copyBtn.addEventListener('click', async () => {
-    if (!lastAssistantText) {
-      toast('Nada para copiar');
-      return;
-    }
-    await navigator.clipboard.writeText(
-      lastAssistantText
-    );
-    toast('Resposta copiada!');
-  });
-
-  clearBtn.addEventListener('click', () => {
-    if (!confirm('Limpar o histórico?')) return;
-    chat.innerHTML = '';
-    addMsg('system', '🧹 Histórico limpo');
-    if (current && current.reset) {
-      current.reset(systemPromptInput.value.trim());
-    }
-  });
-
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && connected) {
-      disconnect();
-    }
-  });
-
-  window.addEventListener('beforeunload', (e) => {
-    if (connected) {
-      e.preventDefault();
-      e.returnValue =
-        'Sessão ativa. Sair mesmo?';
+      stopRecording();
+      if (window.AudioQueue) window.AudioQueue.stop();
+      setConn(false);
+      setStatus('⏸️ Desconectado');
+      addMsg('system', 'Sessão encerrada.');
     }
   });
 })();

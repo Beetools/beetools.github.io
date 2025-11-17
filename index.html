@@ -1,130 +1,112 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>CineTalk — Multi AI Voice</title>
-        <meta name="theme-color" content="#0d0f14" />
-        <meta name="description" content="CineTalk - Recomendações de filmes com ChatGPT, Gemini e Convai" />
-        <link rel="stylesheet" href="css/style.css" />
-    </head>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CineTalk — Multi AI Voice</title>
+    <meta name="theme-color" content="#0d0f14" />
+    <meta name="description" content="CineTalk - Recomendações de filmes com ChatGPT, Gemini e Convai" />
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
 
-    <body>
-        <div class="container">
-            <!-- Top bar -->
-            <div class="appbar">
-                <div class="brand">
-                <div style="font-size:1.6rem">🎬</div>
-                <h1>CineTalk</h1>
-                </div>
-
-                <!-- Switch de provedores -->
-                <div class="provider-switch">
-                <button class="provider-btn active" data-provider="chatgpt">⚡ ChatGPT</button>
-                <button class="provider-btn" data-provider="gemini">✨ Gemini</button>
-                <button class="provider-btn" data-provider="convai">🎭 Convai</button>
-                </div>
-
-                <div class="conn">
-                <span class="dot" id="dot"></span>
-                <span id="connTxt">Desconectado</span>
-                </div>
-            </div>
-
-            <!-- Grid: chat | config -->
-            <div class="grid cols-2">
-                <!-- Left: chat -->
-                <section class="panel">
-                <h2>Chat</h2>
-                <div class="sticky-tip" id="stickyTip">
-                    Clique em "Iniciar" e peça recomendações de filmes por texto ou voz 🎙️
-                </div>
-                <div id="chat" class="chat" aria-live="polite"></div>
-
-                <div style="margin-top:12px" class="row">
-                    <input id="textInput" class="input" placeholder="Digite uma mensagem (Enter para enviar)" style="flex:1" />
-                    <button id="sendBtn" class="btn primary">Enviar</button>
-                    <button id="copyBtn" class="btn">Copiar</button>
-                    <button id="clearBtn" class="btn danger">Limpar</button>
-                </div>
-                </section>
-
-                <!-- Right: config & controls -->
-                <aside class="panel">
-                <h2>Configuração</h2>
-
-                <!-- API Key dinâmica por provedor -->
-                <div class="field">
-                    <label class="label" for="apiKey"><span id="apiKeyLabel">🔑 OpenAI API Key</span></label>
-                    <input id="apiKey" class="input" type="password" placeholder="sk-..." autocomplete="off" />
-                    <small class="muted" id="apiKeyHelp">
-                    Use sua API key da OpenAI (ChatGPT). Para produção, use um backend/proxy.
-                    </small>
-                </div>
-
-                <div class="field" id="charIdField" style="margin-top:10px; display:none">
-                    <label class="label" for="charId">👤 Convai Character ID</label>
-                    <input id="charId" class="input" type="text" placeholder="ID do personagem do Convai..." />
-                    <small class="muted">Usado apenas quando o provedor Convai está selecionado.</small>
-                </div>
-
-                <!-- Personalidade -->
-                <div class="field" style="margin-top:10px">
-                    <label class="label" for="systemPrompt">🧠 Personalidade (opcional)</label>
-                    <textarea id="systemPrompt" class="input" rows="4"
-                    placeholder="Você é Marco, um curador apaixonado por cinema. Responda curto, liste 2 a 4 filmes relevantes, sem fazer perguntas de volta."></textarea>
-                    <small class="muted">Defina como o assistente do provedor atual deve se comportar.</small>
-                </div>
-
-                <!-- Voz -->
-                <div class="panel" style="margin-top:12px">
-                    <h2>Controles de Voz</h2>
-                    <div class="controls">
-                    <button id="ptt" class="ptt" title="Clique para iniciar/parar">🎤</button>
-                    <div id="status" class="status">Configure a API Key para começar</div>
-                    <div id="meter" class="meter" aria-hidden="true">
-                        <div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                        <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
-                    </div>
-                    </div>
-                </div>
-
-                <!-- Sugestões -->
-                <div class="panel" style="margin-top:12px">
-                    <h2>Perguntas Sugeridas</h2>
-                    <div class="suggestions" id="suggs">
-                    <div class="sugg" data-text="Me recomende filmes de ficção científica dos anos 80.">🚀 Sci-fi anos 80</div>
-                    <div class="sugg" data-text="Quais séries de suspense posso ver na Netflix?">🔍 Suspense na Netflix</div>
-                    <div class="sugg" data-text="Quais filmes mais marcantes do Tarantino?">🎬 Tarantino</div>
-                    <div class="sugg" data-text="Sugira séries para assistir em família.">👨‍👩‍👧‍👦 Séries para família</div>
-                    <div class="sugg" data-text="Me indique filmes clássicos de cinema noir.">🕵️ Cinema noir</div>
-                    <div class="sugg" data-text="Recomende animações premiadas recentes.">🎨 Animações premiadas</div>
-                    </div>
-                </div>
-                </aside>
-            </div>
-
-            <!-- Info -->
-            <section class="panel">
-                <h2>ℹ️ Como funciona</h2>
-                <p class="muted">
-                Selecione o provedor (ChatGPT, Gemini ou Convai) no topo, configure a API Key correspondente
-                e faça perguntas sobre filmes por texto ou voz. O comportamento do bot é controlado pelo campo de personalidade.
-                </p>
-            </section>
+  <body>
+    <div class="container">
+      <!-- APPBAR full-bleed -->
+      <div class="appbar">
+        <div class="brand">
+          <!-- usa arquivo local -->
+          <img src="img/beetools.svg" alt="Beetools" height="24" />
+          <h1>CineTalk</h1>
         </div>
 
-        <!-- Toasts -->
-        <div id="toasts" class="toast-wrap"></div>
+        <!-- Switch de provedores -->
+        <div id="providerSwitch" class="provider-switch">
+          <button id="btnChatGPT" class="provider-btn active" data-provider="chatgpt" type="button">ChatGPT</button>
+          <button id="btnConvai"  class="provider-btn" data-provider="convai" type="button">ConvAI</button>
+          <button id="btnGemini"  class="provider-btn" data-provider="gemini" type="button">Gemini</button>
+        </div>
 
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
-        
-        <script src="js/error-handler.js"></script>
-        <script src="js/audio-queue.js"></script>
-        
-        <script src="js/provider-chatgpt.js"></script>
-        <script src="js/provider-gemini.js"></script>
-        <script src="js/provider-convai.js"></script>
-        <script src="js/main.js"></script>
-    </body>
+
+        <div class="conn">
+          <span class="dot" id="dot"></span>
+          <span id="connTxt">Desconectado</span>
+        </div>
+      </div>
+
+      <!-- Chat principal -->
+      <section class="panel">
+        <div class="sticky-tip" id="stickyTip">Clique no microfone ou digite para pedir recomendações 🎬</div>
+
+        <div id="chat" class="chat" aria-live="polite"></div>
+
+        <!-- Input + enviar -->
+        <div style="margin-top:12px" class="row">
+          <button id="ptt" class="ptt" title="Clique para iniciar/parar">🎤</button>
+          <input id="textInput" class="input" placeholder="Digite uma mensagem (Enter para enviar)" style="flex:1" />
+          <button id="sendBtn" class="btn primary" title="Enviar">➤</button>
+        </div>
+
+        <!-- medidor (usado pelo JS) -->
+        <div id="meter" class="meter" aria-hidden="true" style="margin-top:8px">
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+          <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+
+        <div id="status" class="status muted" style="margin-top:6px">Configure a API Key para começar</div>
+      </section>
+
+      <!-- Configuração recolhível -->
+      <aside class="panel config">
+        <details class="config-drawer" open>
+          <summary class="config-summary">
+            <div class="config-summary-title"><strong>Configuração</strong></div>
+            <div class="config-summary-actions"><span class="chev">▾</span></div>
+          </summary>
+
+          <div id="config-body" class="config-body">
+            <!-- API Key dinâmica conforme provedor -->
+            <div class="field">
+              <label class="label" for="apiKey"><span id="apiKeyLabel">OpenAI API Key</span></label>
+              <input id="apiKey" class="input" type="password" placeholder="sk-..." autocomplete="off" />
+              <small class="muted" id="apiKeyHelp">Use sua API Key do provedor selecionado. Em produção, utilize backend/proxy.</small>
+            </div>
+
+            <!-- Character ID (apenas ConvAI) -->
+            <div class="field" id="charIdField" style="display:none">
+              <label class="label" for="charId">Character ID (ConvAI)</label>
+              <input id="charId" class="input" type="text" placeholder="ID do personagem do ConvAI..." />
+              <small class="muted">Mostrado apenas quando ConvAI estiver selecionado.</small>
+            </div>
+
+            <!-- Sugestões usadas pelo JS -->
+            <div class="panel sugg-panel" style="margin-top:12px">
+              <h2>Perguntas Sugeridas</h2>
+              <div class="suggestions" id="suggs">
+                <div class="sugg" data-text="Me recomende filmes de ficção científica dos anos 80.">🚀 Sci-fi anos 80</div>
+                <div class="sugg" data-text="Quais séries de suspense posso ver na Netflix?">🔍 Suspense na Netflix</div>
+                <div class="sugg" data-text="Quais filmes mais marcantes do Tarantino?">🎬 Tarantino</div>
+                <div class="sugg" data-text="Sugira séries para assistir em família.">👨‍👩‍👧‍👦 Séries para família</div>
+                <div class="sugg" data-text="Me indique filmes clássicos de cinema noir.">🕵️ Cinema noir</div>
+                <div class="sugg" data-text="Recomende animações premiadas recentes.">🎨 Animações premiadas</div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </aside>
+    </div>
+
+    <!-- Toasts -->
+    <div id="toasts" class="toast-wrap"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.2/axios.min.js"></script>
+
+    <script src="js/error-handler.js"></script>
+    <script src="js/audio-queue.js"></script>
+
+    <script src="js/provider-chatgpt.js"></script>
+    <script src="js/provider-gemini.js"></script>
+    <script src="js/provider-convai.js"></script>
+    <script src="js/main.js"></script>
+  </body>
 </html>

@@ -31,6 +31,7 @@ window.ConvaiProvider = function (createDeps) {
   }
 
   async function startSession() {
+    console.log('Convai startSession →', { apiKey, charId });
     if (!apiKey || !charId) {
       toast('Configure Convai API Key e Character ID.');
       return false;
