@@ -1,0 +1,113 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+:root{
+  --bg-0:#2f2f2f; --card:#dedede; --ink:#111; --ink-inv:#f6f6f6;
+  --orange:#ff7a00; --orange-d:#e56700; --bd-dark:#00000022;
+}
+
+body{
+  font-family:"Segoe UI", Roboto, sans-serif;
+  background:var(--bg-0); color:var(--ink);
+  padding:0 16px 24px;
+  overflow-x:hidden;            /* remove scroll lateral */
+}
+
+.container{max-width:900px;margin:0 auto}
+
+/* APPBAR full-bleed sem overflow */
+.appbar{
+  position:sticky; top:0; z-index:30;
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  height:56px; padding:14px 18px;
+  margin-left:calc(50% - 50vw);
+  margin-right:calc(50% - 50vw);
+  background:#111; color:#fff; box-shadow:0 6px 20px rgba(0,0,0,.45);
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand h1{font-size:1.5rem;color:var(--orange);letter-spacing:.4px}
+
+/* providers */
+.provider-switch{display:flex;gap:6px}
+.provider-btn{
+  padding:8px 14px;border-radius:999px;border:1px solid #333;
+  background:#222;color:#eee;font-weight:700;cursor:pointer;transition:.2s;
+}
+.provider-btn.active{background:var(--orange);color:#fff}
+.provider-btn:hover{transform:translateY(-1px)}
+
+/* conexão */
+.conn{display:flex;align-items:center;gap:8px;background:#222;border:1px solid #333;border-radius:999px;padding:6px 12px;font-size:.9rem}
+.dot{width:10px;height:10px;border-radius:50%;background:#666}
+.dot.on{background:var(--orange);box-shadow:0 0 10px var(--orange)}
+
+/* painéis */
+.panel{
+  background:var(--card); color:var(--ink);
+  border:1px solid var(--bd-dark); border-radius:22px;
+  box-shadow:0 10px 26px rgba(0,0,0,.25); padding:20px; margin:18px 0;
+}
+.panel h2{font-size:1rem;margin-bottom:10px;color:#222}
+
+/* chat */
+.sticky-tip{font-size:.95rem;color:#333;margin-bottom:8px}
+.chat{
+  height:clamp(420px,55vh,560px); overflow-y:auto;
+  background:var(--card); border-radius:20px; border:1px solid var(--bd-dark); padding:14px;
+}
+.msg{
+  background:var(--orange); color:#fff; border-radius:18px;
+  padding:14px 16px; margin:10px 0; box-shadow:0 8px 18px rgba(0,0,0,.18);
+  overflow-wrap:anywhere;
+}
+.msg.user{margin-left:18%;border-bottom-right-radius:10px}
+.msg.assistant{margin-right:18%;border-bottom-left-radius:10px}
+.time{display:block;text-align:right;font-size:.75rem;margin-top:4px;color:#fff9}
+
+/* input */
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.input{
+  width:100%;border:none;border-radius:999px;padding:14px 16px;
+  background:#e5e5e5;color:#222;font-size:1rem;box-shadow:inset 0 0 0 2px #00000018;
+}
+.input::placeholder{color:#555}
+.btn{border:none;border-radius:999px;padding:12px 14px;background:#ddd;color:#111;font-weight:700;cursor:pointer;transition:.2s}
+.btn.primary{background:var(--orange);color:#fff}
+.btn:hover{transform:translateY(-1px)}
+.status{text-align:center;font-size:.9rem;margin-top:6px;color:#222}
+
+/* mic */
+.ptt{
+  width:46px;height:46px;border-radius:50%;border:none;background:#222;color:#fff;font-size:1.2rem;cursor:pointer;transition:.2s;box-shadow:0 6px 14px rgba(0,0,0,.35)
+}
+.ptt.listening{background:var(--orange);animation:pttPulse 1.2s infinite}
+@keyframes pttPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+
+/* meter como “pontinhos” */
+.meter{height:16px;display:flex;gap:6px;align-items:flex-end;justify-content:center}
+.bar{width:8px;height:8px;border-radius:50%;background:#ff7a00}
+
+/* drawer config */
+.config .config-drawer{display:block;border-radius:20px;background:#cfcfcf;border:1px solid var(--bd-dark)}
+.config-summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;cursor:pointer;user-select:none;background:#bdbdbd;border-radius:20px 20px 0 0}
+.config-summary::-webkit-details-marker{display:none}
+.config .chev{display:inline-block;transition:transform .25s ease}
+.config .config-drawer[open] .chev{transform:rotate(180deg)}
+.config-body{padding:12px 16px 16px}
+.field{display:grid;gap:6px;margin-bottom:10px}
+.label{font-weight:800;color:var(--orange-d)}
+#charIdField{display:none} /* o JS mostra quando ConvAI estiver ativo */
+.sugg-panel{background:#e6e6e6;border-color:#00000018}
+.suggestions{display:grid;gap:8px}
+.sugg{background:#d8d8d8;border:1px solid #00000020;padding:10px 12px;border-radius:12px;cursor:pointer}
+.sugg:hover{background:#d2d2d2;transform:translateX(4px);transition:.18s}
+
+/* toasts */
+.toast-wrap{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:10px;z-index:99}
+.toast{background:rgba(20,20,20,.9);color:#fff;padding:12px 14px;border-radius:12px;min-width:240px;font-size:.95rem}
+
+/* responsivo */
+@media (max-width:780px){
+  .container{max-width:100%}
+  .msg.user{margin-left:10%}
+  .msg.assistant{margin-right:10%}
+}
